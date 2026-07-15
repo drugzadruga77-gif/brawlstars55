@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: player
+    description: Brawl Stars player statistics
 paths:
   /healthz:
     get:
@@ -24,6 +26,102 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /players/{tag}:
+    get:
+      operationId: getPlayer
+      tags: [player]
+      summary: Get player profile
+      description: Returns full profile for a Brawl Stars player tag, including club, trophies and every brawler with power level, rank, gadgets, star powers, gears and hypercharge.
+      parameters:
+        - name: tag
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 3
+      responses:
+        "200":
+          description: Player profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+        "404":
+          description: Player not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Upstream Brawl Stars API error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /players/{tag}/battlelog:
+    get:
+      operationId: getPlayerBattleLog
+      tags: [player]
+      summary: Get recent battles
+      description: Returns the player's most recent battles with mode, map, result and teammates/opponents with their trophies.
+      parameters:
+        - name: tag
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 3
+      responses:
+        "200":
+          description: Recent battles
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BattleLog"
+        "404":
+          description: Player not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Upstream Brawl Stars API error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /players/{tag}/today:
+    get:
+      operationId: getPlayerTodayStats
+      tags: [player]
+      summary: Get today's play stats
+      description: Aggregates the battle log into today's games played, wins/losses/draws and estimated time played, based on the battles the Brawl Stars API still exposes (last ~25).
+      parameters:
+        - name: tag
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 3
+      responses:
+        "200":
+          description: Today's stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodayStats"
+        "404":
+          description: Player not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Upstream Brawl Stars API error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +131,207 @@ components:
           type: string
       required:
         - status
-
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    NamedItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required: [id, name]
+    Gear:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        level:
+          type: integer
+      required: [id, name, level]
+    PlayerBrawler:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        power:
+          type: integer
+        rank:
+          type: integer
+        trophies:
+          type: integer
+        highestTrophies:
+          type: integer
+        gadgets:
+          type: array
+          items:
+            $ref: "#/components/schemas/NamedItem"
+        starPowers:
+          type: array
+          items:
+            $ref: "#/components/schemas/NamedItem"
+        gears:
+          type: array
+          items:
+            $ref: "#/components/schemas/Gear"
+        hypercharges:
+          type: array
+          items:
+            $ref: "#/components/schemas/NamedItem"
+      required:
+        [
+          id,
+          name,
+          power,
+          rank,
+          trophies,
+          highestTrophies,
+          gadgets,
+          starPowers,
+          gears,
+          hypercharges,
+        ]
+    Player:
+      type: object
+      properties:
+        tag:
+          type: string
+        name:
+          type: string
+        nameColor:
+          type: ["string", "null"]
+        iconId:
+          type: integer
+        trophies:
+          type: integer
+        highestTrophies:
+          type: integer
+        expLevel:
+          type: integer
+        expPoints:
+          type: integer
+        soloVictories:
+          type: integer
+        duoVictories:
+          type: integer
+        trioVictories:
+          type: integer
+        clubTag:
+          type: ["string", "null"]
+        clubName:
+          type: ["string", "null"]
+        clubRole:
+          type: ["string", "null"]
+        brawlers:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlayerBrawler"
+      required:
+        [
+          tag,
+          name,
+          nameColor,
+          iconId,
+          trophies,
+          highestTrophies,
+          expLevel,
+          expPoints,
+          soloVictories,
+          duoVictories,
+          trioVictories,
+          clubTag,
+          clubName,
+          clubRole,
+          brawlers,
+        ]
+    BattlePlayer:
+      type: object
+      properties:
+        tag:
+          type: string
+        name:
+          type: string
+        brawlerId:
+          type: integer
+        brawlerName:
+          type: string
+        brawlerPower:
+          type: integer
+        brawlerTrophies:
+          type: integer
+      required:
+        [tag, name, brawlerId, brawlerName, brawlerPower, brawlerTrophies]
+    BattleLogEntry:
+      type: object
+      properties:
+        battleTime:
+          type: string
+          format: date-time
+        mode:
+          type: string
+        map:
+          type: ["string", "null"]
+        type:
+          type: string
+        result:
+          type: ["string", "null"]
+        duration:
+          type: ["integer", "null"]
+        trophyChange:
+          type: ["integer", "null"]
+        starPlayerTag:
+          type: ["string", "null"]
+        teams:
+          type: array
+          items:
+            type: array
+            items:
+              $ref: "#/components/schemas/BattlePlayer"
+      required:
+        [
+          battleTime,
+          mode,
+          map,
+          type,
+          result,
+          duration,
+          trophyChange,
+          starPlayerTag,
+          teams,
+        ]
+    BattleLog:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/BattleLogEntry"
+      required: [items]
+    TodayStats:
+      type: object
+      properties:
+        date:
+          type: string
+        gamesPlayed:
+          type: integer
+        wins:
+          type: integer
+        losses:
+          type: integer
+        draws:
+          type: integer
+        timePlayedMinutes:
+          type: number
+        trophyChange:
+          type: integer
+      required:
+        [date, gamesPlayed, wins, losses, draws, timePlayedMinutes, trophyChange]

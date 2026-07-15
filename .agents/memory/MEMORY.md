@@ -1,0 +1,1 @@
+- [Brawl Stars API quirks](brawl-stats-api.md) — IP-locked keys, tag encoding, compact timestamps, ~25 item battle log cap.

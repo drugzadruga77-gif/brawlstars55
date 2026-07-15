@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Brawl Stars Статистика"
+version = "1.0.0"
+id = "artifacts/brawl-stats"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21764
+
+[services.development]
+run = "pnpm --filter @workspace/brawl-stats run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/brawl-stats", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/brawl-stats/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21764"
+BASE_PATH = "/"
