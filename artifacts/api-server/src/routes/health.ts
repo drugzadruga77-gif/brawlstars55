@@ -8,5 +8,16 @@ router.get("/healthz", (_req, res) => {
   res.json(data);
 });
 
+// Temporary: discover outbound IP of this server instance.
+router.get("/server-ip", async (_req, res) => {
+  try {
+    const r = await fetch("https://api.ipify.org?format=json");
+    const json = await r.json() as { ip: string };
+    res.json({ ip: json.ip });
+  } catch {
+    res.status(500).json({ error: "Could not determine IP" });
+  }
+});
+
 
 export default router;
