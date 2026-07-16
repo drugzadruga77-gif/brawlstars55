@@ -22,11 +22,11 @@ router.get("/brawl-proxy/*path", async (req, res) => {
     return;
   }
 
-  const subPath = Array.isArray(req.params.path)
-    ? req.params.path.join("/")
-    : (req.params.path ?? "");
-  const search = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
-  const target = `https://api.brawlstars.com/v1/${subPath}${search}`;
+  // Use req.url (raw, still URL-encoded) so %23 is preserved as-is.
+  // req.params.path is decoded by Express, turning %23 → # which would
+  // truncate the fetch URL at the fragment separator.
+  const rawPath = req.url.replace(/^\/brawl-proxy/, "");
+  const target = `https://api.brawlstars.com/v1${rawPath}`;
 
   let upstream: Response;
   try {
