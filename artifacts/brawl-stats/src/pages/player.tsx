@@ -48,7 +48,9 @@ export default function Player() {
     query: { enabled: !!tag, queryKey: ["battleLog", tag] },
   });
 
-  const isLoading = isPlayerLoading || isTodayStatsLoading || isBattleLogLoading;
+  // Only block full-page loading on the primary player query.
+  // Secondary queries (today/battlelog) show inline when ready.
+  const isLoading = isPlayerLoading;
   const isError = playerError;
 
   const handleRefresh = () => {
@@ -423,7 +425,7 @@ export default function Player() {
                          </span>
                        )}
                        <span className="text-xs font-semibold text-muted-foreground/60 bg-white/5 px-2 py-1 rounded">
-                         {format(parseISO(battle.battleTime), "HH:mm", { locale: ru })}
+                         {(() => { try { return format(parseISO(battle.battleTime), "HH:mm", { locale: ru }); } catch { return "--:--"; } })()}
                        </span>
                     </div>
                   </div>

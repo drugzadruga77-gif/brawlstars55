@@ -73,7 +73,14 @@ async function brawlFetch<T>(path: string): Promise<T> {
     throw new BrawlApiError(502, "Brawl Stars API временно недоступен.");
   }
 
-  return (await response.json()) as T;
+  let body: T;
+  try {
+    body = (await response.json()) as T;
+  } catch {
+    logger.error({ url }, "Brawl Stars API returned non-JSON body");
+    throw new BrawlApiError(502, "Brawl Stars API вернул некорректный ответ.");
+  }
+  return body;
 }
 
 export function fetchRawPlayer(tag: string): Promise<RawPlayer> {

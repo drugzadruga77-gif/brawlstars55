@@ -49,6 +49,7 @@ export function BrawlerIcon({ brawlerId, className, fallbackName }: BrawlerIconP
     <img
       src={`/api/images/brawler/${brawlerId}`}
       alt={fallbackName || "Brawler"}
+      loading="lazy"
       className={cn("object-contain drop-shadow-xl", className)}
       onError={() => setError(true)}
     />

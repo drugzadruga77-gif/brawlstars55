@@ -15,13 +15,21 @@ export default function Home() {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem("brawl_recent_tag");
-    if (saved) setRecentSearch(saved);
+    try {
+      const saved = localStorage.getItem("brawl_recent_tag");
+      if (saved) setRecentSearch(saved);
+    } catch {
+      // localStorage may be unavailable in private/restricted mode
+    }
   }, []);
 
   const onSubmit = (data: SearchValues) => {
     const formatted = formatTag(data.tag);
-    localStorage.setItem("brawl_recent_tag", formatted);
+    try {
+      localStorage.setItem("brawl_recent_tag", formatted);
+    } catch {
+      // localStorage may be unavailable in private/restricted mode
+    }
     setLocation(`/player/${formatted}`);
   };
 
