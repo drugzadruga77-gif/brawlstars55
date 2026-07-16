@@ -28,20 +28,30 @@ router.get("/brawl-proxy/*path", async (req, res) => {
   const search = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
   const target = `https://api.brawlstars.com/v1/${subPath}${search}`;
 
+  let upstream: Response;
   try {
-    const upstream = await fetch(target, {
+    upstream = await fetch(target, {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         Accept: "application/json",
       },
     });
-
-    const body = await upstream.text();
-    res.status(upstream.status).type("application/json").send(body);
   } catch (err) {
-    logger.error({ err, target }, "Brawl proxy upstream error");
+    logger.error({ err, target }, "Brawl proxy upstream network error");
     res.status(502).json({ error: "Ошибка соединения с Brawl Stars API." });
+    return;
   }
+
+  let body: string;
+  try {
+    body = await upstream.text();
+  } catch (err) {
+    logger.error({ err, target }, "Brawl proxy failed to read upstream body");
+    res.status(502).json({ error: "Некорректный ответ от Brawl Stars API." });
+    return;
+  }
+
+  res.status(upstream.status).type("application/json").send(body);
 });
 
 export default router;
