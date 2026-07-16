@@ -1,6 +1,10 @@
 import { logger } from "./logger";
 
-const BRAWL_API_BASE = "https://api.brawlstars.com/v1";
+// In production, BRAWL_API_BASE points to the dev-server proxy endpoint
+// (IP 34.14.171.190, whitelisted in the API key) so outbound calls always
+// originate from the correct IP regardless of where the prod server runs.
+const BRAWL_API_BASE =
+  process.env.BRAWL_API_BASE ?? "https://api.brawlstars.com/v1";
 
 export class BrawlApiError extends Error {
   status: number;

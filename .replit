@@ -18,3 +18,8 @@ expertMode = true
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
+
+[userenv]
+
+[userenv.production]
+BRAWL_API_BASE = "https://8b72007e-a58c-4df1-8303-5c09c231c024-00-2esyb1m92zrjb.sisko.replit.dev/api/brawl-proxy"
